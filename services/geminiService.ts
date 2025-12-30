@@ -1,9 +1,10 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { DimensionScore } from "../types";
 
 export const getCoachingAdvice = async (scores: DimensionScore[]): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+  // Use the API key directly from process.env as per guidelines
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   // Find the lowest scoring dimension to focus the coaching advice
   const sorted = [...scores].sort((a, b) => a.value - b.value);

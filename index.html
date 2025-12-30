@@ -9,8 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Noto+Sans+SC', sans-serif;
+            font-family: 'Noto Sans SC', sans-serif;
             background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
         }
         .bg-soft-green { background-color: #A8D5BA; }
         .text-soft-green { color: #A8D5BA; }
@@ -23,8 +25,13 @@
         }
     </style>
     <script>
-        // 浏览器环境 process 对象垫片，防止访问 process.env 时崩溃
-        window.process = window.process || { env: { NODE_ENV: 'production' } };
+        // Critical: Establish process.env before any modules load
+        window.process = {
+            env: {
+                NODE_ENV: 'production',
+                API_KEY: '' // Will be populated by environment if available
+            }
+        };
     </script>
     <script type="importmap">
 {
@@ -42,5 +49,6 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- The environment will automatically inject the script tag for index.tsx -->
 </body>
 </html>
