@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>幸福教练 - Happiness Coach</title>
-    <!-- 使用预编译的静态 CSS 避免 CSP 的 eval 错误 -->
+    <!-- 使用完全静态的 CSS，不涉及 JS 运行时 -->
     <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -15,16 +15,9 @@
             margin: 0;
             padding: 0;
         }
-        /* 补充 Tailwind 3 缺失的类或自定义色值 */
         .bg-soft-green { background-color: #A8D5BA; }
         .text-soft-green { color: #A8D5BA; }
         .bg-serene-blue { background-color: #BDE0FE; }
-        .text-serene-blue { color: #BDE0FE; }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         #loading-screen {
             position: fixed;
             inset: 0;
@@ -34,39 +27,27 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease-out;
         }
-        /* 旋转动画补充 */
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
     <script>
-        // 核心垫片
+        // 核心生产环境垫片
         window.process = { env: { NODE_ENV: 'production', API_KEY: '' } };
-        
-        // 错误监控
-        window.onerror = function(msg, url, line, col, error) {
-            console.error('JS Error:', msg);
+        window.onerror = function(msg) {
+            console.error('Boot Error:', msg);
             const status = document.getElementById('loading-status');
-            if (status) {
-                status.innerText = '启动失败 (错误码: CSP_EVAL_BLOCK)';
-                status.className = 'text-red-400 text-sm mt-4';
-            }
+            if (status) status.innerText = '初始化失败，请尝试刷新页面';
         };
     </script>
     <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
-    "@google/genai": "https://esm.sh/@google/genai@1.3.0",
+    "react": "https://esm.sh/react@18.2.0?bundle",
+    "react-dom": "https://esm.sh/react-dom@18.2.0?bundle",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?bundle",
+    "recharts": "https://esm.sh/recharts@2.10.3?external=react,react-dom&bundle",
+    "@google/genai": "https://esm.sh/@google/genai@1.3.0?bundle",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
@@ -75,27 +56,22 @@
 </head>
 <body>
     <div id="loading-screen">
-        <div class="w-12 h-12 border-4 border-blue-200 border-t-green-400 rounded-full animate-spin mb-4"></div>
-        <p id="loading-status" class="text-gray-400 text-sm">正在开启幸福空间...</p>
+        <div class="w-10 h-10 border-4 border-gray-200 border-t-green-400 rounded-full animate-spin mb-4"></div>
+        <p id="loading-status" class="text-gray-400 text-xs tracking-widest">正在启动幸福教练...</p>
     </div>
-
     <div id="root"></div>
-
+    <script type="module" src="./index.tsx"></script>
     <script>
-        // 监测挂载状态
-        let checkCount = 0;
-        const checkInterval = setInterval(() => {
+        // 监控挂载，成功后移除加载层
+        const timer = setInterval(() => {
             const root = document.getElementById('root');
             if (root && root.children.length > 0) {
                 const screen = document.getElementById('loading-screen');
-                if (screen) {
-                    screen.style.opacity = '0';
-                    setTimeout(() => screen.remove(), 500);
-                }
-                clearInterval(checkInterval);
+                if (screen) screen.style.display = 'none';
+                clearInterval(timer);
             }
-            if (++checkCount > 100) clearInterval(checkInterval); // 10秒超时
         }, 100);
+        setTimeout(() => clearInterval(timer), 10000);
     </script>
 </body>
 </html>
