@@ -1,0 +1,5 @@
+{
+  "name": "幸福教练 - OHQ 心理健康助手",
+  "description": "基于牛津幸福感问卷 (OHQ) 的个人心理成长助手。提供专业的测评维度分析、雷达图可视化看板，并结合 Gemini AI 提供个性化的积极心理学教练建议。",
+  "requestFramePermissions": []
+}
