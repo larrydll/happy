@@ -36,7 +36,7 @@
         }
     </style>
     <script>
-        // 初始化环境对象，防止模块加载时 ReferenceError
+        // 1. 核心垫片：必须在所有模块加载前执行
         window.process = { 
             env: { 
                 NODE_ENV: 'production',
@@ -44,13 +44,13 @@
             } 
         };
         
-        // 全局错误捕获，用于白屏调试
+        // 2. 错误捕获：捕获模块加载失败或运行时错误
         window.onerror = function(msg, url, line, col, error) {
-            console.error('Critical Error:', msg, 'at', url, ':', line);
+            console.error('Critical Error:', msg);
             const status = document.getElementById('loading-status');
             if (status) {
-                status.innerText = '加载失败: ' + msg;
-                status.style.color = '#ef4444';
+                status.innerText = '加载失败: 模块解析错误 (请检查网络或刷新)';
+                status.className = 'text-red-400 text-sm mt-4 text-center px-4';
             }
             return false;
         };
@@ -70,19 +70,30 @@
 </script>
 </head>
 <body>
-    <!-- 加载状态遮罩 -->
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-soft-green border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p id="loading-status" class="text-gray-400 text-sm">正在加载幸福教练...</p>
+        <p id="loading-status" class="text-gray-400 text-sm">正在初始化幸福空间...</p>
     </div>
 
     <div id="root"></div>
 
     <script>
-        // 监听应用是否成功挂载，成功后移除加载遮罩
+        // 3. 状态监测：如果 8 秒后还没挂载成功，大概率是模块依赖解析失败了
+        const loadingTimeout = setTimeout(() => {
+            const root = document.getElementById('root');
+            if (!root || root.children.length === 0) {
+                const status = document.getElementById('loading-status');
+                if (status) {
+                    status.innerHTML = '加载时间过长，请尝试：<br/>1. 检查网络连接<br/>2. 刷新页面<br/>3. 确保浏览器支持 ESM';
+                    status.className = 'text-orange-400 text-xs mt-4 text-center leading-loose';
+                }
+            }
+        }, 8000);
+
         const observer = new MutationObserver((mutations) => {
             const root = document.getElementById('root');
             if (root && root.children.length > 0) {
+                clearTimeout(loadingTimeout);
                 const screen = document.getElementById('loading-screen');
                 if (screen) {
                     screen.style.opacity = '0';
